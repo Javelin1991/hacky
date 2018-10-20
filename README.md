@@ -4,7 +4,7 @@ hacky app
 
 MADE BY
 ---
-Nick
-Felicia
-Htet
-Wei Kang
+- Nick
+- Felicia
+- Htet
+- Wei Kang
