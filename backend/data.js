@@ -547,9 +547,171 @@ const purchaseStatistics = {
   ]
 }
 
+// not synchrony
+
+const savings = {
+  1: {
+    totalBalance: 20
+  },
+  2: {
+    totalBalance: 650000
+  },
+  3: {
+    totalBalance: 25
+  },
+  4: {
+    totalBalance: 35
+  },
+  5: {
+    totalBalance: 45
+  },
+}
+
+const personalProfiles = {
+  1: {
+    age: 20
+  },
+  2: {
+    age: 65
+  },
+  3: {
+    age: 25
+  },
+  4: {
+    age: 35
+  },
+  5: {
+    age: 45
+  },
+}
+
+const incomes = {
+  1: [
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-01",
+      "amount": "2000",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-01",
+      "amount": "2000",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-10-01",
+      "amount": "2000",
+      "itemType": "Salary",
+    },
+  ],
+  2: [
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-10-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+  ],
+  3: [
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-10-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+  ],
+  4: [
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-10-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+  ],
+  5: [
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-10-01",
+      "amount": "3500",
+      "itemType": "Salary",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-01",
+      "amount": "98",
+      "itemType": "Dividends",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-01",
+      "amount": "108",
+      "itemType": "Dividends",
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-10-01",
+      "amount": "202",
+      "itemType": "Dividends",
+    },
+  ],
+}
+
 module.exports = {
   creditProfiles,
   profiles,
   transactions,
+  incomes,
   purchaseStatistics,
+  personalProfiles,
+  savings,
 };
