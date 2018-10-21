@@ -27,7 +27,7 @@ export default class HomeScreen extends React.Component {
   state = {
     showScanner: false,
     btnText: 'Shop',
-    showSlidingUpPanel: true,
+    showSlidingUpPanel: false,
     itemList: []
   };
 
@@ -48,14 +48,22 @@ export default class HomeScreen extends React.Component {
   }
 
   createListItem = (image_url, product_name, price, store_name) => {
+    let showSlidingUpPanel = false;
+    if (this.state.itemList.length === 3) {
+        showSlidingUpPanel = true;
+        this.setState({
+            showSlidingUpPanel
+        });
+    }
     const item = (
-    <View key={this.state.itemList.length} style={{ margin: 4 }}>
+    <View key={this.state.itemList.length} style={{ margin: 16 }}>
         { this.state.itemList.length === 0 &&
-          <View style={{ marginTop: 8, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'center', height: 100 }}>
+          <View style={{ marginTop: 20, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'center', height: 100, borderTopWidth: 2, borderColor: "#FB877F"  }}>
             <Image
               style={{
                 width: 200,
                 height: 55,
+                marginTop: 10,
                 backgroundColor: 'white',
                 resizeMode: 'cover',
                 bottom: -10
@@ -65,12 +73,11 @@ export default class HomeScreen extends React.Component {
             />
           </View>
         }
-        <View style={{ padding: 8, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between', height: 76, borderWidth: 1, borderColor: "#FB877F", borderRadius: 4 }}>
+        <View style={{ padding: 8, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between', height: 76, borderWidth: 1, borderColor: "transparent", borderRadius: 4 }}>
           <Image
             style={{
               width: 55,
               height: 55,
-              marginRight: 24,
               resizeMode: 'contain',
             }}
             source={{
@@ -78,6 +85,17 @@ export default class HomeScreen extends React.Component {
                 `${image_url}`,
             }}
           />
+          <View style={{ flex: 0, justifyContent: 'center', alignItems: 'center' }}>
+            <View style={{ flex: 0, justifyContent: 'center', alignItems: 'center', marginLeft: 8, marginRight: 8, height: 15, width: 15, borderRadius: 100, backgroundColor: showSlidingUpPanel ? "red" : '#00FF00' }}
+            >
+            {
+              showSlidingUpPanel ?
+              <Icon name={'close'} size={14} color={'white'}/>
+              :
+              <Icon name={'done'} size={14} color={'white'}/>
+            }
+            </View>
+          </View>
           <View style={{ padding: 8, flex: 1, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-start'}}>
               <Text>{product_name}</Text>
               <Text>{price}</Text>
@@ -86,6 +104,10 @@ export default class HomeScreen extends React.Component {
       </View>
     );
     const array = [...this.state.itemList];
+    if (array.length%2 !== 0) {
+      array.push(
+        <View key={array.length+1} style={{ position: 'relative', marginTop: -40, marginBottom: -40, left: 92, height: 70, backgroundColor: "#EE7600", width: 6, borderRadius: 100 }}/>)
+    }
     array.push(item);
     this.setState({
       itemList: array
@@ -94,6 +116,7 @@ export default class HomeScreen extends React.Component {
 
 
   render() {
+    const warning = "You're going to overspend your budget for this month."
     return (
       <View style={styles.container}>
         {
@@ -140,12 +163,15 @@ export default class HomeScreen extends React.Component {
                 visible={this.state.showSlidingUpPanel}
                 onRequestClose={() => this.setState({showSlidingUpPanel: false})}>
                     <View style={styles.slidingUpPanel}>
-                      <TouchableOpacity style={{ position: 'absolute', right: 8, top: 8 }} onPress={() => this.setState({showSlidingUpPanel: false})}>
-                          <Icon name={'close'} size={36} color={'white'} />
+                      <TouchableOpacity style={{ position: 'absolute', right: 8, top: 8, borderRadius: 100, backgroundColor: 'grey' }} onPress={() => this.setState({showSlidingUpPanel: false})}>
+                          <Icon name={'close'} size={30} color={'white'} style={{ opacity: 1 }} />
                       </TouchableOpacity>
                       <View style={{ flex: 1, alignSelf: 'flex-start', justifyContent: 'flex-start' }}>
-                        <Text style={{ color: 'white', fontWeight: '500', fontSize: 24, marginLeft: 36, marginTop: 36 }}>
-                        You're going to overspend your budget for this month.
+                        <Text style={{ color: 'white', fontWeight: '500', fontSize: 24, marginLeft: 56, marginTop: 56 }}>
+                        {warning}
+                        </Text>
+                        <Text style={{ textDecorationLine: 'underline', color: 'white', fontWeight: '500', fontSize: 24, marginLeft: 56, marginTop: 36 }}>
+                        See more
                         </Text>
                       </View>
                     </View>
@@ -207,7 +233,7 @@ const styles = StyleSheet.create({
     color: "#FB877F",
     textAlign: 'center',
     alignSelf: 'center',
-    fontWeight: '900',
+    fontWeight: '700',
     letterSpacing: 1,
     marginTop: 46,
   },
