@@ -13,7 +13,7 @@ import {
 import { WebBrowser } from 'expo';
 import { MonoText } from '../components/StyledText';
 import Scanner from '../components/Scanner';
-import {GradientButton} from '../components/gradientButton';
+// import {GradientButton} from '../components/gradientButton';
 import Button from '../components/Button';
 import SlidingUpPanel from 'rn-sliding-up-panel';
 
@@ -45,63 +45,7 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
-    return (
-      <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          {
-            !this.state.showScanner &&
-              <View style={styles.getStartedContainer}>
-                <Text style={styles.getStartedText}>
-                  Welcome back, Felicia
-                </Text>
-              </View>
-        }
-        {
-          this.state.showScanner &&
-            <View style={styles.container}>
-                <Scanner/>
-            </View>
-        }
-        </ScrollView>
-        {
-          <View>
-              <SlidingUpPanel
-                ref={c => (this._panel = c)}
-                visible={this.state.showSlidingUpPanel}
-                allowDragging={this.state.allowDragging}
-                onRequestClose={() => this.setState({showSlidingUpPanel: false})}>
-                    <View style={styles.slidingUpContainer}>
-                      <TouchableOpacity onPress={() => this.setState({showSlidingUpPanel: false})}>
-                        <View>
-                          <Text>Hide</Text>
-                        </View>
-                      </TouchableOpacity>
-                      <ScrollView
-                        onTouchEnd={() => this.setState({allowDragging: true})}
-                        onTouchCancel={() => this.setState({allowDragging: true})}
-                        onTouchStart={() => this.setState({allowDragging: false})}>
-                        <Text>Here is the content inside panel</Text>
-                        <Text>Here is the content inside panel</Text>
-                        <Text>Here is the content inside panel</Text>
-                        <Text>Here is the content inside panel</Text>
-                        <Text>Here is the content inside panel</Text>
-                        <Text>Here is the content inside panel</Text>
-                      </ScrollView>
-                    </View>
-              </SlidingUpPanel>
-        </View>
-        }
-        {
-          <Button
-            onPress={() => this.onPrimaryBtnPress(!this.state.showScanner)}
-          >
-            <View style={styles.actionButton}>
-                <Text style={styles.actionText}>{this.state.btnText}</Text>
-            </View>
-          </Button>
-        }
-      </View>
-    );
+    return (null);
   }
 }
 

@@ -7,13 +7,17 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Dimensions,
-  Animated
+  Alert,
+  Dimensions
 } from 'react-native';
 import { WebBrowser } from 'expo';
-import { Button } from 'react-native-material-ui';
 import { MonoText } from '../components/StyledText';
 import Scanner from '../components/Scanner';
+import SadEmoji from '../components/Scanner';
+// import {GradientButton} from '../components/gradientButton';
+import Button from '../components/Button';
+import SlidingUpPanel from 'rn-sliding-up-panel';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const WIDTH = Dimensions.get('window').width;
 const HEIGHT = Dimensions.get('window').height;
@@ -22,8 +26,9 @@ export default class HomeScreen extends React.Component {
 
   state = {
     showScanner: false,
-    btnText: 'Scan',
-    item: null,
+    btnText: 'Shop',
+    showSlidingUpPanel: true,
+    itemList: []
   };
 
   static navigationOptions = {
@@ -31,15 +36,35 @@ export default class HomeScreen extends React.Component {
   };
 
   onPrimaryBtnPress = (flag) => {
+    if (this.state.showScanner) {
+      Alert.alert(
+        'Purchase Success'
+      );
+    }
     this.setState({
         showScanner: flag,
-        btnText: flag ? 'Done' : 'Scan'
+        btnText: flag ? 'Visa Checkout' : 'Shop'
     });
   }
 
-  createListItem = (image_url, product_name, price) => {
+  createListItem = (image_url, product_name, price, store_name) => {
     const item = (
-    <View style={{ margin: 16 }}>
+    <View key={this.state.itemList.length} style={{ margin: 4 }}>
+        { this.state.itemList.length === 0 &&
+          <View style={{ marginTop: 8, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'center', height: 100 }}>
+            <Image
+              style={{
+                width: 200,
+                height: 55,
+                backgroundColor: 'white',
+                resizeMode: 'cover',
+                bottom: -10
+              }}
+              defaultSource={require('../assets/images/walmart.png')}
+              source={require('../assets/images/walmart.png')}
+            />
+          </View>
+        }
         <View style={{ padding: 8, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between', height: 76, borderWidth: 1, borderColor: "#FB877F", borderRadius: 4 }}>
           <Image
             style={{
@@ -60,8 +85,10 @@ export default class HomeScreen extends React.Component {
         </View>
       </View>
     );
+    const array = [...this.state.itemList];
+    array.push(item);
     this.setState({
-      item: item
+      itemList: array
     })
   }
 
@@ -69,74 +96,65 @@ export default class HomeScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <View style={styles.welcomeContainer}>
-          <Image
-            source={
-              __DEV__
-                ? require('../assets/images/robot-dev.png')
-                : require('../assets/images/robot-prod.png')
-            }
-            style={styles.welcomeImage}
-          />
-        </View>
-        { !this.state.showScanner &&
-          <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <View style={styles.getStartedContainer}>
-            <Text style={styles.getStartedText}>
-              Welcome to Plan Ready
-            </Text>
-            <Button raised primary text={this.state.btnText} onPress={() => this.onPrimaryBtnPress(true)}/> // raised button with primary color
-          </View>
+        {
+          this.state.showScanner &&
+                <Scanner
+                  createListItem={this.createListItem}
+                />
+        }
+        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+          {
+            !this.state.showScanner &&
+              <View style={styles.getStartedContainer}>
+                <Text style={styles.getStartedText}>
+                  ENVISION
+                </Text>
+                <Image
+                  style={{
+                    width: 250,
+                    height: 250,
+                    backgroundColor: 'white',
+                    resizeMode: 'contain',
+                  }}
+                  defaultSource={require('../assets/images/logo.png')}
+                  source={require('../assets/images/logo.png')}
+                />
+              </View>
+        }
+        {this.state.itemList}
         </ScrollView>
-      }
-      { this.state.showScanner &&
-        <View style={styles.scanner}>
-          <View style={{ marginBottom: 24 }}>
-            <Scanner
-              createListItem={this.createListItem}
-            />
-          </View>
-          <Button raised primary text={this.state.btnText} onPress={() => this.onPrimaryBtnPress(false)}/> // raised button with primary color
+        {
+          <Button
+            onPress={() => this.onPrimaryBtnPress(!this.state.showScanner)}
+          >
+            <View style={styles.actionButton}>
+                <Text style={styles.actionText}>{this.state.btnText}</Text>
+            </View>
+          </Button>
+        }
+        { this.state.showSlidingUpPanel &&
+          <View style={styles.slidingUpContainer}>
+              <SlidingUpPanel
+                ref={c => (this._panel = c)}
+                allowDragging={false}
+                visible={this.state.showSlidingUpPanel}
+                onRequestClose={() => this.setState({showSlidingUpPanel: false})}>
+                    <View style={styles.slidingUpPanel}>
+                      <TouchableOpacity style={{ position: 'absolute', right: 8, top: 8 }} onPress={() => this.setState({showSlidingUpPanel: false})}>
+                          <Icon name={'close'} size={36} color={'white'} />
+                      </TouchableOpacity>
+                      <View style={{ flex: 1, alignSelf: 'flex-start', justifyContent: 'flex-start' }}>
+                        <Text style={{ color: 'white', fontWeight: '500', fontSize: 24, marginLeft: 36, marginTop: 36 }}>
+                        You're going to overspend your budget for this month.
+                        </Text>
+                      </View>
+                    </View>
+              </SlidingUpPanel>
         </View>
-      }
-      <View/>
-          {this.state.item}
+        }
       </View>
     );
   }
-
-  _maybeRenderDevelopmentModeWarning() {
-    if (__DEV__) {
-      const learnMoreButton = (
-        <Text onPress={this._handleLearnMorePress} style={styles.helpLinkText}>
-          Learn more
-        </Text>
-      );
-
-      return (
-        <Text style={styles.developmentModeText}>
-          Development mode is enabled, your app will be slower but you can use useful development
-          tools. {learnMoreButton}
-        </Text>
-      );
-    } else {
-      return (
-        <Text style={styles.developmentModeText}>
-          You are not in development mode, your app will run at full speed.
-        </Text>
-      );
-    }
-  }
-
-  _handleLearnMorePress = () => {
-    WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/guides/development-mode');
-  };
-
-  _handleHelpPress = () => {
-    WebBrowser.openBrowserAsync(
-      'https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes'
-    );
-  };
 }
 
 const styles = StyleSheet.create({
@@ -178,8 +196,6 @@ const styles = StyleSheet.create({
   },
   scanner: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   codeHighlightContainer: {
     backgroundColor: 'rgba(0,0,0,0.05)',
@@ -187,11 +203,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   getStartedText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    lineHeight: 24,
+    fontSize: 56,
+    color: "#FB877F",
     textAlign: 'center',
-    marginBottom: 25
+    alignSelf: 'center',
+    fontWeight: '900',
+    letterSpacing: 1,
+    marginTop: 46,
   },
   tabBarInfoContainer: {
     position: 'absolute',
@@ -232,12 +250,49 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2e78b7',
   },
-  image: {
-    width: 48,
+  actionButton: {
+    borderRadius: 28,
+    elevation: 2,
+    shadowColor: "#000000",
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+    shadowOffset: {
+        height: 1,
+        width: 0
+    },
+    position: 'absolute',
+    justifyContent: 'center',
     height: 48,
-    borderRadius: 24,
-    marginRight: 8,
-    resizeMode: 'contain'
-    // backgroundColor: 'white'
-  }
+    bottom: 20,
+    left: WIDTH/4,
+    width: WIDTH/2,
+    backgroundColor: '#FB877F'
+  },
+  actionText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    textAlign: 'center',
+    fontWeight: '500'
+  },
+  slidingUpContainer: {
+    flex: 1,
+    elevation: 5,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#000000",
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    shadowOffset: {
+        height: 3,
+        width: 0
+    },
+  },
+  slidingUpPanel: {
+    flex: 1,
+    elevation: 5,
+    backgroundColor: "#FB877F",
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
