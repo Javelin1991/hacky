@@ -5,7 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
+  TouchableHighlight,
   View,
   Alert,
   Dimensions,
@@ -19,6 +19,8 @@ import Button from '../components/Button';
 import SlidingUpPanel from 'rn-sliding-up-panel';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+const Buffer = require('buffer/').Buffer
+
 const WIDTH = Dimensions.get('window').width;
 const HEIGHT = Dimensions.get('window').height;
 
@@ -31,7 +33,8 @@ export default class HomeScreen extends React.Component {
     showSlidingUpPanel: false,
     total: 0,
     seeMore: false,
-    itemList: []
+    itemList: [],
+    showSpinner: false,
   };
 
   static navigationOptions = {
@@ -40,15 +43,51 @@ export default class HomeScreen extends React.Component {
 
   onPrimaryBtnPress = (flag) => {
     if (this.state.showScanner) {
-      Alert.alert(
-        'Purchase Success'
-      );
+      this.setState({
+          showSpinner: true
+      });
+      this._spinner = true;
+      setTimeout(() => {
+        this.setState({
+            showSpinner: false
+        });
+        this.state.total && Alert.alert(
+          'Purchase Success'
+        );
+      }, 1000)
+    } else {
+      if (this.state.total !== 0) {
+        this.setState({
+            itemList: [],
+            total: 0
+        });
+      }
     }
     this.setState({
         purchased: true,
         showScanner: flag,
-        btnText: flag ? 'Checkout' : 'Shop More'
+        btnText: flag ? 'Checkout' : 'Shop More',
     });
+
+    if (flag) {
+        const data = {
+            price: this.state.total,
+            payerId: 7,
+            payeeId: 10,
+            itemType: "groceries"
+        }
+        fetch('http://hacky.nicklum.space/api/pay', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        })
+        .then((res) => {
+           console.log("HN DEBUG nick res", res);
+        });
+    }
   }
 
   createListItem = (image_url, product_name, price, storePrice, store_name) => {
@@ -64,7 +103,7 @@ export default class HomeScreen extends React.Component {
     const item = (
     <View key={this.state.itemList.length} style={{ margin: 16 }}>
         { this.state.itemList.length === 0 &&
-          <View style={{ marginTop: 20, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'center', height: 100, borderTopWidth: 2, borderColor: "#FB877F"  }}>
+          <View style={{ marginTop: 20, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'flex-start', height: 100, borderTopWidth: 2, borderColor: "#FB877F"  }}>
             <Image
               style={{
                 width: 200,
@@ -122,8 +161,11 @@ export default class HomeScreen extends React.Component {
 
 
   render() {
-    const warning = "This is $2 higher than the average price."
-    const warning2 = "At this rate, you will exceed your monthly budget in 10 days."
+    let warning = "This is $2 higher than the average price. "
+    const warning2 = "This is 20% of your total grocery budget of $100. At this rate, you will exceed your monthly budget in 10 days."
+    if (this.state.seeMore) {
+      warning += warning2;
+    }
     return (
       <View style={styles.container}>
         {
@@ -170,6 +212,43 @@ export default class HomeScreen extends React.Component {
           </Button>
         }
         { this.state.showSlidingUpPanel &&
+          <Image
+            style={{
+              position: 'absolute',
+              left: WIDTH/3 + 36,
+              top: HEIGHT/2 + 40,
+              width: 80,
+              height: 80,
+              zIndex: 3,
+              backgroundColor: 'transparent',
+              resizeMode: 'contain',
+              shadowColor: "#000000",
+              shadowOpacity: 0.5,
+              shadowRadius: 2,
+              shadowOffset: {
+                  height: 1,
+                  width: 0
+              },
+            }}
+            defaultSource={require('../assets/images/sad.png')}
+            source={require('../assets/images/sad.png')}
+          />
+        }
+        { this.state.showSpinner &&
+        <ActivityIndicator
+          style={{
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              position: 'absolute',
+              alignItems: 'center',
+              justifyContent: 'center',
+          }}
+          color={'#FB877F'} size={'large'}
+        />
+        }
+        { this.state.showSlidingUpPanel &&
           <View style={styles.slidingUpContainer}>
               <SlidingUpPanel
                 ref={c => (this._panel = c)}
@@ -177,25 +256,21 @@ export default class HomeScreen extends React.Component {
                 visible={this.state.showSlidingUpPanel}
                 onRequestClose={() => this.setState({showSlidingUpPanel: false})}>
                     <View style={styles.slidingUpPanel}>
-                      <TouchableOpacity style={{ position: 'absolute', right: 8, top: 8, borderRadius: 100, backgroundColor: 'grey' }} onPress={() => this.setState({showSlidingUpPanel: false})}>
+                      <TouchableHighlight style={{ height: 30, width: 30, position: 'absolute', right: 8, top: 8, borderRadius: 100, backgroundColor: 'grey' }} onPress={() => this.setState({showSlidingUpPanel: false})}>
                           <Icon name={'close'} size={30} color={'white'} style={{ opacity: 1 }} />
-                      </TouchableOpacity>
-                      <ScrollView style={{marginTop: 10, padding: 25}}>
+                      </TouchableHighlight>
+                      <ScrollView style={{marginTop: 20, padding: 25}}>
                       <View style={{ flex: 1, alignSelf: 'flex-start', justifyContent: 'flex-start' }}>
-                        <Text style={{ color: 'white', fontWeight: '500', fontSize: 24 }}>
+                        <Text style={{ color: 'white', fontWeight: '500', fontSize: 24, marginBottom: 10 }}>
                         {warning}
                         </Text>
                         {
-                          !this.state.seeMore ?
-                          <TouchableOpacity onPress={() => this.setState({seeMore: true})}>
+                          !this.state.seeMore &&
+                          <TouchableHighlight onPress={() => this.setState({seeMore: true})}>
                             <Text style={{ textDecorationLine: 'underline', color: 'white', fontWeight: '500', fontSize: 24, marginTop: 45 }}>
                             See more
                             </Text>
-                          </TouchableOpacity>
-                          :
-                          <Text style={{ color: 'white', fontWeight: '500', fontSize: 24 }}>
-                          {warning2}
-                          </Text>
+                          </TouchableHighlight>
                         }
                       </View>
                       </ScrollView>
