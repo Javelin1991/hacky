@@ -7,7 +7,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Dimensions
+  Dimensions,
+  Animated
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { Button } from 'react-native-material-ui';
@@ -21,7 +22,8 @@ export default class HomeScreen extends React.Component {
 
   state = {
     showScanner: false,
-    btnText: 'Scan'
+    btnText: 'Scan',
+    item: null,
   };
 
   static navigationOptions = {
@@ -29,12 +31,40 @@ export default class HomeScreen extends React.Component {
   };
 
   onPrimaryBtnPress = (flag) => {
-    console.log("HN DEBUG onPrimaryBtnPress");
     this.setState({
         showScanner: flag,
         btnText: flag ? 'Done' : 'Scan'
     });
   }
+
+  createListItem = (image_url, product_name, price) => {
+    const item = (
+    <View style={{ margin: 16 }}>
+        <View style={{ padding: 8, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between', height: 76, borderWidth: 1, borderColor: "#FB877F", borderRadius: 4 }}>
+          <Image
+            style={{
+              width: 55,
+              height: 55,
+              marginRight: 24,
+              resizeMode: 'contain',
+            }}
+            source={{
+              uri:
+                `${image_url}`,
+            }}
+          />
+          <View style={{ padding: 8, flex: 1, flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+              <Text>{product_name}</Text>
+              <Text>{price}</Text>
+          </View>
+        </View>
+      </View>
+    );
+    this.setState({
+      item: item
+    })
+  }
+
 
   render() {
     return (
@@ -61,12 +91,16 @@ export default class HomeScreen extends React.Component {
       }
       { this.state.showScanner &&
         <View style={styles.scanner}>
-          <View style={{ marginBottom: 35 }}>
-            <Scanner/>
+          <View style={{ marginBottom: 24 }}>
+            <Scanner
+              createListItem={this.createListItem}
+            />
           </View>
           <Button raised primary text={this.state.btnText} onPress={() => this.onPrimaryBtnPress(false)}/> // raised button with primary color
         </View>
       }
+      <View/>
+          {this.state.item}
       </View>
     );
   }
@@ -143,9 +177,9 @@ const styles = StyleSheet.create({
     color: 'rgba(96,100,109, 0.8)',
   },
   scanner: {
-    position: 'absolute',
-    top: HEIGHT/4,
-    left: WIDTH/4
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   codeHighlightContainer: {
     backgroundColor: 'rgba(0,0,0,0.05)',
@@ -198,4 +232,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2e78b7',
   },
+  image: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: 8,
+    resizeMode: 'contain'
+    // backgroundColor: 'white'
+  }
 });
