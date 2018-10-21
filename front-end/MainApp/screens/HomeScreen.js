@@ -8,13 +8,13 @@ import {
   TouchableOpacity,
   View,
   Alert,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { MonoText } from '../components/StyledText';
 import Scanner from '../components/Scanner';
 import SadEmoji from '../components/Scanner';
-// import {GradientButton} from '../components/gradientButton';
 import Button from '../components/Button';
 import SlidingUpPanel from 'rn-sliding-up-panel';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -26,8 +26,11 @@ export default class HomeScreen extends React.Component {
 
   state = {
     showScanner: false,
+    purchased: false,
     btnText: 'Shop',
     showSlidingUpPanel: false,
+    total: 0,
+    seeMore: false,
     itemList: []
   };
 
@@ -42,12 +45,13 @@ export default class HomeScreen extends React.Component {
       );
     }
     this.setState({
+        purchased: true,
         showScanner: flag,
-        btnText: flag ? 'Visa Checkout' : 'Shop'
+        btnText: flag ? 'Checkout' : 'Shop More'
     });
   }
 
-  createListItem = (image_url, product_name, price, store_name) => {
+  createListItem = (image_url, product_name, price, storePrice, store_name) => {
     let showSlidingUpPanel = false;
     if (this.state.itemList.length === 3) {
         showSlidingUpPanel = true;
@@ -55,6 +59,8 @@ export default class HomeScreen extends React.Component {
             showSlidingUpPanel
         });
     }
+    const newTotal = Math.round((this.state.total + storePrice) * 100) / 100;
+    this.setState({ total: newTotal });
     const item = (
     <View key={this.state.itemList.length} style={{ margin: 16 }}>
         { this.state.itemList.length === 0 &&
@@ -116,32 +122,40 @@ export default class HomeScreen extends React.Component {
 
 
   render() {
-    const warning = "You're going to overspend your budget for this month."
+    const warning = "This is $2 higher than the average price."
+    const warning2 = "At this rate, you will exceed your monthly budget in 10 days."
     return (
       <View style={styles.container}>
         {
           this.state.showScanner &&
-                <Scanner
-                  createListItem={this.createListItem}
-                />
+            <Scanner
+              createListItem={this.createListItem}
+            />
         }
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
           {
             !this.state.showScanner &&
               <View style={styles.getStartedContainer}>
                 <Text style={styles.getStartedText}>
-                  ENVISION
+                  { this.state.purchased ? 'E-RECEIPT' : 'ENVISION' }
                 </Text>
-                <Image
-                  style={{
-                    width: 250,
-                    height: 250,
-                    backgroundColor: 'white',
-                    resizeMode: 'contain',
-                  }}
-                  defaultSource={require('../assets/images/logo.png')}
-                  source={require('../assets/images/logo.png')}
-                />
+                {
+                  !this.state.purchased ?
+                  <Image
+                    style={{
+                      width: 250,
+                      height: 250,
+                      backgroundColor: 'white',
+                      resizeMode: 'contain',
+                    }}
+                    defaultSource={require('../assets/images/logo.png')}
+                    source={require('../assets/images/logo.png')}
+                  />
+                  :
+                  <Text style={styles.getStartedText2}>
+                    {`$${this.state.total}`}
+                  </Text>
+                }
               </View>
         }
         {this.state.itemList}
@@ -166,14 +180,25 @@ export default class HomeScreen extends React.Component {
                       <TouchableOpacity style={{ position: 'absolute', right: 8, top: 8, borderRadius: 100, backgroundColor: 'grey' }} onPress={() => this.setState({showSlidingUpPanel: false})}>
                           <Icon name={'close'} size={30} color={'white'} style={{ opacity: 1 }} />
                       </TouchableOpacity>
+                      <ScrollView style={{marginTop: 10, padding: 25}}>
                       <View style={{ flex: 1, alignSelf: 'flex-start', justifyContent: 'flex-start' }}>
-                        <Text style={{ color: 'white', fontWeight: '500', fontSize: 24, marginLeft: 56, marginTop: 56 }}>
+                        <Text style={{ color: 'white', fontWeight: '500', fontSize: 24 }}>
                         {warning}
                         </Text>
-                        <Text style={{ textDecorationLine: 'underline', color: 'white', fontWeight: '500', fontSize: 24, marginLeft: 56, marginTop: 36 }}>
-                        See more
-                        </Text>
+                        {
+                          !this.state.seeMore ?
+                          <TouchableOpacity onPress={() => this.setState({seeMore: true})}>
+                            <Text style={{ textDecorationLine: 'underline', color: 'white', fontWeight: '500', fontSize: 24, marginTop: 45 }}>
+                            See more
+                            </Text>
+                          </TouchableOpacity>
+                          :
+                          <Text style={{ color: 'white', fontWeight: '500', fontSize: 24 }}>
+                          {warning2}
+                          </Text>
+                        }
                       </View>
+                      </ScrollView>
                     </View>
               </SlidingUpPanel>
         </View>
@@ -234,6 +259,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     alignSelf: 'center',
     fontWeight: '700',
+    letterSpacing: 1,
+    marginTop: 46,
+  },
+  getStartedText2: {
+    fontSize: 44,
+    textAlign: 'center',
+    alignSelf: 'center',
+    fontWeight: '500',
     letterSpacing: 1,
     marginTop: 46,
   },
