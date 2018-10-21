@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, Alert } from 'react-native';
+import { Text, View, StyleSheet, Alert, Dimensions } from 'react-native';
 import { Constants, BarCodeScanner, Permissions } from 'expo';
+const HEIGHT = Dimensions.get('window').height;
 
 export default class Scanner extends Component {
   state = {
@@ -34,7 +35,7 @@ export default class Scanner extends Component {
             <Text>Camera permission is not granted</Text> :
             <BarCodeScanner
               onBarCodeRead={this._handleBarCodeRead}
-              style={{ height: 200, width: 200 }}
+              style={{ height: HEIGHT/3 }}
             />
         }
       </View>
@@ -45,9 +46,6 @@ export default class Scanner extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: Constants.statusBarHeight,
     backgroundColor: '#ecf0f1',
   }
 });
