@@ -554,7 +554,7 @@ const savings = {
     totalBalance: 20
   },
   2: {
-    totalBalance: 650000
+    totalBalance: 35
   },
   3: {
     totalBalance: 25
@@ -572,7 +572,7 @@ const personalProfiles = {
     age: 20
   },
   2: {
-    age: 65
+    age: 25
   },
   3: {
     age: 25

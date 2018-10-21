@@ -12,6 +12,8 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
+    "ml-regression-multivariate-linear": "^1.2.0",
+    "ml-regression-simple-linear": "^1.0.2",
     "needle": "^2.2.4",
     "request": "^2.88.0"
   }

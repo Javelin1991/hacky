@@ -4,6 +4,9 @@ const express = require("express");
 const needle = require('needle');
 const request = require("request");
 const bodyParser = require('body-parser');
+const SLR = require("ml-regression-simple-linear");
+const MLR = require("ml-regression-multivariate-linear");
+var fs = require('fs');
 
 // setup
 const app = express();
@@ -216,6 +219,7 @@ const getNextAgeLimit = (age) => {
 
 const getMultiplier = (cust, monthlyStats) => {
   const { averageMonthlySpend, averageMonthlyIncome, averageYearlyIncome } = monthlyStats;
+  console.log(averageMonthlySpend, averageMonthlyIncome, averageYearlyIncome);
   const fidelity = {
     30: 1.0,
     40: 3.0,
@@ -228,8 +232,9 @@ const getMultiplier = (cust, monthlyStats) => {
     return 0;
   }
   let multiplier = fidelity[nextAgeLimit];
-  if (cust.totalBalance > multiplier * averageMonthlySpend) {
-    multiplier = (multiplier * averageMonthlySpend) / cust.totalBalance;
+  console.log(multiplier);
+  if (cust.totalBalance > multiplier * averageYearlyIncome) {
+    multiplier = (multiplier * averageYearlyIncome) / cust.totalBalance;
   }
   console.log(multiplier);
   return multiplier;
@@ -249,17 +254,21 @@ const getCustGoal = (custId) => {
   const multiplier = getMultiplier(cust, monthlyStats);
 
   const totalGoal = multiplier > 0 ? averageYearlyIncome * multiplier : -1;
+  console.log("total goal", totalGoal);
   if (totalGoal === -1) {
+    console.log("total goal lower than 0");
     return -1;
   }
 
   const remaining = totalGoal - cust.totalBalance;
+  console.log("remaining", remaining);
   if (remaining < 0) {
+    console.log("more balance than goal");
     return -1;
   }
 
   const remainingMonthly = (remaining * 1.0) / (getNextAgeLimit(cust.age) * 12);
-
+  console.log("remaining monthly", remainingMonthly);
   return remainingMonthly;
   /*
   recommended by fidelity:
@@ -281,25 +290,109 @@ const getGoalsHandler = (req, res) => {
 }
 
 const itemCheckHandler = (req, res) => {
-  console.log(req.query);
+  // console.log(req.query);
   const { price, custId } = req.query;
-  const { currentMonthSpend, averageMonthlySpend } = getCustMonthlyStats(custId, 10);
-  const spendRatio = parseFloat(currentMonthSpend) / parseFloat(averageMonthlySpend);
-  const newMonthSpend = parseFloat(currentMonthSpend) + parseFloat(price);
-  const newSpendRatio = newMonthSpend / parseFloat(averageMonthlySpend);
-  const data = {
-    withinBudget: newSpendRatio < 1.0,
-    newSpendRatio: newSpendRatio,
-    newMonthSpend: newMonthSpend,
-    currentMonthSpend,
-    averageMonthlySpend,
-  }
-  res.json(Api.success(data));
+  const itemPrice = parseInt(price);
+  // const { currentMonthSpend, averageMonthlySpend } = getCustMonthlyStats(custId, 10);
+  // const spendRatio = parseFloat(currentMonthSpend) / parseFloat(averageMonthlySpend);
+  // const newMonthSpend = parseFloat(currentMonthSpend) + parseFloat(price);
+  // const newSpendRatio = newMonthSpend / parseFloat(averageMonthlySpend);
+  // const data = {
+  //   withinBudget: newSpendRatio < 1.0,
+  //   newSpendRatio: newSpendRatio,
+  //   newMonthSpend: newMonthSpend,
+  //   currentMonthSpend,
+  //   averageMonthlySpend,
+  // }
+  // res.json(Api.success(data));
+  const { pastMonthsSpend, currentMonthSpend, averageMonthlySpend, averageMonthlyIncome } = getCustMonthlyStats(custId, 10);
+  // const x = [[112, 8], [85.62, 14], [50, 15], [28.65, 18], [101.23, 23], [200, 26], [233.56, 29]];
+  // const y = [[112], [85.62 + 112], [85.62 + 112 + 50], [85.62 + 112 + 50 + 28.65], [85.62 + 112 + 50 + 28.65 + 101.23], [85.62 + 112 + 50 + 28.65 + 101.23 + 200], [85.62 + 112 + 50 + 28.65 + 101.23 + 200 + 233.56]];
+  const x_days = [8,14,15,18,23,26,27];
+  const y_spend = [2112,2197.62,2247.62,2276.27,2377.5,2577.5,2811.06];
+  // y_spend.push(y_spend[y_spend.length-1] + price);
+  // x_days.push(30);
+  y_spend[y_spend.length-1] += itemPrice;
+  // console.log(x);
+  // console.log(y);
+  const regression = new SLR(x_days, y_spend);
+  const currentDayOfMonth = 31;
+  const predictedSpend = Math.max(y_spend[y_spend.length-1], regression.predict([currentDayOfMonth]));
+  // const averageMonthlySpend
+  const goal = getCustGoal(custId);
+  const savingGoal = goal > 0 ? goal : 0;
+  const spendGoal = averageMonthlyIncome - savingGoal
+
+  res.json(Api.success({predictedSpend, spendGoal}));
 };
 
 const makePaymentHandler = (req, res) => {
   const { price, payerId, payeeId } = req.body;
-  res.json(Api.success({}));
+  const fullUrl = "https://sandbox.api.visa.com/visadirect/fundstransfer/v1/pullfundstransactions";
+  const userId = "9QFEG2CLWNY5T90Z169C21orzAexMmQkseGk6HPileeSNP-Qo";
+  const password = "QsKD00w576BqMMqdds3FyQF5700H0D98hFu";
+  const keyFile = "./privateKey.pem";
+  const certificateFile = "./cert.pem";
+  const caFile = "./DigiCertGlobalRootCA.crt";
+  // console.log(fs.readFileSync(keyFile).toString());
+  const data = {
+    "acquirerCountryCode": "840",
+    "acquiringBin": "408999",
+    "amount": price,
+    "businessApplicationId": "AA",
+    "cardAcceptor": {
+      "address": {
+        "country": "USA",
+        "county": "081",
+        "state": "CA",
+        "zipCode": "94404"
+      },
+      "idCode": "ABCD1234ABCD123",
+      "name": "Visa Inc. USA-Foster City",
+      "terminalId": "ABCD1234"
+    },
+    "cavv": "0700100038238906000013405823891061668252",
+    "foreignExchangeFeeTransaction": "11.99",
+    "localTransactionDateTime": "2018-10-21T15:51:03",
+    "retrievalReferenceNumber": "330000550000",
+    "senderCardExpiryDate": "2015-10",
+    "senderCurrencyCode": "USD",
+    "senderPrimaryAccountNumber": "4895142232120006",
+    "surcharge": "11.99",
+    "systemsTraceAuditNumber": "451001",
+    "nationalReimbursementFee": "11.22",
+    "cpsAuthorizationCharacteristicsIndicator": "Y",
+    "addressVerificationData": {
+      "street": "XYZ St",
+      "postalCode": "12345"
+    }
+  };
+  request({
+    method: "POST",
+    uri: fullUrl,
+    key: fs.readFileSync(keyFile),//.toString(),
+    cert: fs.readFileSync(certificateFile),//.toString(),
+    // ca: fs.readFileSync(caFile),//.toString(),
+    headers: {
+      'Content-Type' : 'application/json',
+      'Accept' : 'application/json',
+      'Authorization' : 'Basic ' + new Buffer(userId + ':' + password).toString('base64'),
+    },
+    body: data,
+    json: true,
+  }, (err, response, body) => {
+    // if (!body) {
+    //   return res.json(Api.success({}));
+    // }
+    return res.json(Api.success(body));
+    // profiles[custId] = body;
+    // if (Object.keys(profiles).length !== 5) {
+    //   return getCustProfile(res, profiles, custId + 1);
+    // } else {
+    //   return res.json(Api.success(profiles));
+    // }
+  });
+  // res.json(Api.success({}));
 }
 
 // routes
