@@ -140,10 +140,48 @@ const getHistoryHandler = (req, res) => {
   // getCustInteractions(res, {}, 1);
 }
 
+const getMonthlyStats = (currentMonth) => {
+  const { transactions, profiles } = Data;
+  const stats = {};
+  for (let i = 1; i < 6; i++) {
+    const cust = {
+      pastMonths: {},
+      currentMonthSpend: 0.0,
+    };
+    const custTxs = transactions[i];
+    let total = 0.0;
+    let monthsCounted = 0;
+    custTxs.forEach((tx) => {
+      const amount = parseFloat(tx.amount)
+      const month = tx.date.split("-")[1];
+      if (month == currentMonth) {
+        cust.currentMonthSpend += amount;
+        return;
+      }
+      if (!cust.pastMonths[month]) {
+        cust.pastMonths[month] = 0.0;
+      }
+      total += amount;
+      cust.pastMonths[month] += amount;
+    });
+    const realAverage = (total * 1.0) / Object.keys(cust.pastMonths).length;
+    cust.averageMonthlySpend = parseFloat(profiles[i].averageMonthlySpend);
+    cust.realAverageMonthlySpend = realAverage;
+    stats[i] = cust;
+  }
+  return stats;
+}
+
+const getMonthlyHandler = (req, res) => {
+  const currentMonth = 10;
+  res.json(Api.success(getMonthlyStats(currentMonth)));
+}
+
 // routes
 app.get('/', rootHandler);
 app.post('/item/check', itemCheckHandler);
 app.post('/train', getHistoryHandler);
+app.post('/monthly', getMonthlyHandler);
 
 // start script
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
