@@ -34,24 +34,28 @@ export default class Scanner extends Component {
             "price": "$11.09",
             "product_name": "Convenience Valet Crest Tpaste Travel Tbrush Combo",
             "store_name": "Walmart.com",
+            "store_price": 11.09
           }],
           "0036600828010": [{
             "image_url": "https://images.barcodelookup.com/324/3246818-1.jpg",
             "price": "$1.69",
             "product_name": "ChapStick Lip Moisturizer SPF 12 0.15 Oz",
             "store_name": "Walmart",
+            "store_price": 1.69
           }],
           "0722252102003": [{
            "image_url": "https://images.barcodelookup.com/1413/14137045-1.jpg",
            "price": "$1.50",
            "product_name": "Clif Bar, Energy Bar, Cool Mint Chocolate",
            "store_name": "Walmart",
+           "store_price": 1.5
          }],
            "0028400091565": [{
             "image_url": "https://images.barcodelookup.com/3181/31817934-1.jpg",
             "price": "$1.48",
             "product_name": "Lay's ® Classic Potato Chips 1.5 Oz. Bag",
             "store_name": "Wal-Mart.com USA, LLC",
+            "store_price": 1.48
         }]
       }
       let response = ITEMS_LIST[`${barcode}`];
@@ -80,14 +84,15 @@ export default class Scanner extends Component {
             product_name: realTimeResponseJson.products[0].product_name,
             image_url: realTimeResponseJson.products[0].images[0],
             price: price,
-            barcode: barcode
+            barcode: barcode,
+            store_price: store_price
          }
          console.log("HN DEBUG listObj", listObj);
-         this.props.createListItem && this.props.createListItem(listObj.image_url, listObj.product_name, listObj.price, listObj.store_name);
+         this.props.createListItem && this.props.createListItem(listObj.image_url, listObj.product_name, listObj.price, listObj.store_price, listObj.store_name);
       } else {
           let responseJson = response[0];
           if (responseJson) {
-            this.props.createListItem && this.props.createListItem(responseJson.image_url, responseJson.product_name, responseJson.price, responseJson.store_name);
+            this.props.createListItem && this.props.createListItem(responseJson.image_url, responseJson.product_name, responseJson.price, responseJson.store_price, responseJson.store_name);
           }
       }
       const soundObject =  new Expo.Audio.Sound();
