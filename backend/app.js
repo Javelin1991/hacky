@@ -227,7 +227,7 @@ const getMultiplier = (cust, monthlyStats) => {
     60: 8.0,
     67: 10.0,
   }
-  const nextAgeLimit = getNextAgeLimit(30);
+  const nextAgeLimit = getNextAgeLimit(cust.age);
   if (nextAgeLimit > 67) {
     return 0;
   }
@@ -249,7 +249,8 @@ const getCustGoal = (custId) => {
   };
   const currentMonth = 10;
   const monthlyStats = getCustMonthlyStats(custId, currentMonth);
-  const { averageMonthlySpend, averageMonthlyIncome, averageYearlyIncome } = monthlyStats;
+  console.log(monthlyStats);
+  const { averageMonthlySpend, averageMonthlyIncome, averageYearlyIncome, realAverageMonthlySpend } = monthlyStats;
 
   const multiplier = getMultiplier(cust, monthlyStats);
 
@@ -267,8 +268,14 @@ const getCustGoal = (custId) => {
     return -1;
   }
 
-  const remainingMonthly = (remaining * 1.0) / (getNextAgeLimit(cust.age) * 12);
+  const monthsLeft = (67 - getNextAgeLimit(cust.age)) * 12;
+  console.log("months left", monthsLeft);
+  const remainingMonthly = (remaining * 1.0) / monthsLeft;
   console.log("remaining monthly", remainingMonthly);
+
+  // if (remainingMonthly < realAverageMonthlySpend) {
+  //   return realAverageMonthlySpend * 1;
+  // }
   return remainingMonthly;
   /*
   recommended by fidelity:
@@ -305,7 +312,7 @@ const itemCheckHandler = (req, res) => {
   //   averageMonthlySpend,
   // }
   // res.json(Api.success(data));
-  const { pastMonthsSpend, currentMonthSpend, averageMonthlySpend, averageMonthlyIncome } = getCustMonthlyStats(custId, 10);
+  const { pastMonthsSpend, currentMonthSpend, averageMonthlySpend, averageMonthlyIncome, realAverageMonthlySpend } = getCustMonthlyStats(custId, 10);
   // const x = [[112, 8], [85.62, 14], [50, 15], [28.65, 18], [101.23, 23], [200, 26], [233.56, 29]];
   // const y = [[112], [85.62 + 112], [85.62 + 112 + 50], [85.62 + 112 + 50 + 28.65], [85.62 + 112 + 50 + 28.65 + 101.23], [85.62 + 112 + 50 + 28.65 + 101.23 + 200], [85.62 + 112 + 50 + 28.65 + 101.23 + 200 + 233.56]];
   const x_days = [8,14,15,18,23,26,27];
@@ -321,13 +328,13 @@ const itemCheckHandler = (req, res) => {
   // const averageMonthlySpend
   const goal = getCustGoal(custId);
   const savingGoal = goal > 0 ? goal : 0;
-  const spendGoal = averageMonthlyIncome - savingGoal
+  const spendGoal = savingGoal > goal ? averageMonthlyIncome - savingGoal : realAverageMonthlySpend * 0.8;
 
   res.json(Api.success({predictedSpend, spendGoal}));
 };
 
 const makePaymentHandler = (req, res) => {
-  const { price, payerId, payeeId } = req.body;
+  const { price, payerId, payeeId, itemType } = req.body;
   const fullUrl = "https://sandbox.api.visa.com/visadirect/fundstransfer/v1/pullfundstransactions";
   const userId = "9QFEG2CLWNY5T90Z169C21orzAexMmQkseGk6HPileeSNP-Qo";
   const password = "QsKD00w576BqMMqdds3FyQF5700H0D98hFu";
@@ -370,9 +377,8 @@ const makePaymentHandler = (req, res) => {
   request({
     method: "POST",
     uri: fullUrl,
-    key: fs.readFileSync(keyFile),//.toString(),
-    cert: fs.readFileSync(certificateFile),//.toString(),
-    // ca: fs.readFileSync(caFile),//.toString(),
+    key: fs.readFileSync(keyFile),
+    cert: fs.readFileSync(certificateFile),
     headers: {
       'Content-Type' : 'application/json',
       'Accept' : 'application/json',
@@ -384,7 +390,18 @@ const makePaymentHandler = (req, res) => {
     // if (!body) {
     //   return res.json(Api.success({}));
     // }
-    return res.json(Api.success(body));
+    Data.transactions[payerId].push({
+      retailer: payeeId,
+      date: "2018-10-21",
+      amount: price,
+      itemType: itemType,
+    });
+    const monthlyStats = getCustMonthlyStats(payerId, 10);
+    const { pastMonthsSpend, currentMonthSpend, averageMonthlySpend, averageMonthlyIncome, realAverageMonthlySpend } = monthlyStats;
+    const goal = getCustGoal(payerId);
+    const savingGoal = goal > 0 ? goal : 0;
+    const spendGoal = savingGoal > goal ? averageMonthlyIncome - savingGoal : realAverageMonthlySpend * 0.8;
+    return res.json(Api.success({visa: body, stats: monthlyStats, spendGoal, savingGoal}));
     // profiles[custId] = body;
     // if (Object.keys(profiles).length !== 5) {
     //   return getCustProfile(res, profiles, custId + 1);

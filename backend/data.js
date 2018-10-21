@@ -11,6 +11,18 @@ const transactions = {
       "date": "2018-09-05",
       "amount": "90.00",
       "itemType": "Interest"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-05",
+      "amount": "890.00",
+      "itemType": "Rent"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-05",
+      "amount": "890.00",
+      "itemType": "Rent"
     }
   ],
   2: [
@@ -103,6 +115,24 @@ const transactions = {
       "date": "2018-10-02",
       "amount": "31.12",
       "itemType": "gasoline"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-05",
+      "amount": "2890.00",
+      "itemType": "Rent"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-05",
+      "amount": "2890.00",
+      "itemType": "Rent"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-10-05",
+      "amount": "2890.00",
+      "itemType": "Rent"
     }
   ],
   3: [
@@ -123,6 +153,18 @@ const transactions = {
       "date": "2018-10-07",
       "amount": "55.68",
       "itemType": "gasoline"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-05",
+      "amount": "890.00",
+      "itemType": "Rent"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-05",
+      "amount": "890.00",
+      "itemType": "Rent"
     }
   ],
   4: [
@@ -155,6 +197,18 @@ const transactions = {
       "date": "2018-09-10",
       "amount": "900.66",
       "itemType": "payment"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-05",
+      "amount": "890.00",
+      "itemType": "Rent"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-05",
+      "amount": "890.00",
+      "itemType": "Rent"
     }
   ],
   5: [
@@ -211,6 +265,18 @@ const transactions = {
       "date": "2018-10-01",
       "amount": "546.87",
       "itemType": "concert tickets"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-09-05",
+      "amount": "890.00",
+      "itemType": "Rent"
+    },
+    {
+      "retailer": "Retailer1",
+      "date": "2018-08-05",
+      "amount": "890.00",
+      "itemType": "Rent"
     }
   ]
 };
@@ -554,7 +620,7 @@ const savings = {
     totalBalance: 20
   },
   2: {
-    totalBalance: 35
+    totalBalance: 300000
   },
   3: {
     totalBalance: 25
@@ -572,7 +638,7 @@ const personalProfiles = {
     age: 20
   },
   2: {
-    age: 25
+    age: 55
   },
   3: {
     age: 25
@@ -610,19 +676,19 @@ const incomes = {
     {
       "retailer": "Retailer1",
       "date": "2018-08-01",
-      "amount": "3500",
+      "amount": "6500",
       "itemType": "Salary",
     },
     {
       "retailer": "Retailer1",
       "date": "2018-09-01",
-      "amount": "3500",
+      "amount": "6500",
       "itemType": "Salary",
     },
     {
       "retailer": "Retailer1",
       "date": "2018-10-01",
-      "amount": "3500",
+      "amount": "6500",
       "itemType": "Salary",
     },
   ],
