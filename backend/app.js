@@ -299,6 +299,7 @@ const itemCheckHandler = (req, res) => {
 
 const makePaymentHandler = (req, res) => {
   const { price, payerId, payeeId } = res.body;
+  res.json(Api.success({}));
 }
 
 // routes
