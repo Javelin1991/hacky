@@ -298,7 +298,7 @@ const itemCheckHandler = (req, res) => {
 };
 
 const makePaymentHandler = (req, res) => {
-  const { price, payerId, payeeId } = res.body;
+  const { price, payerId, payeeId } = req.body;
   res.json(Api.success({}));
 }
 
