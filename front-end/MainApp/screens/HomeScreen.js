@@ -19,6 +19,8 @@ import Button from '../components/Button';
 import SlidingUpPanel from 'rn-sliding-up-panel';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+const Buffer = require('buffer/').Buffer
+
 const WIDTH = Dimensions.get('window').width;
 const HEIGHT = Dimensions.get('window').height;
 
@@ -45,6 +47,60 @@ export default class HomeScreen extends React.Component {
         showScanner: flag,
         btnText: flag ? 'Visa Checkout' : 'Shop'
     });
+    if (flag) {
+        const data = {
+            "acquirerCountryCode": "840",
+            "acquiringBin": "408999",
+            "amount": "124.02",
+            "businessApplicationId": "AA",
+            "cardAcceptor": {
+            "address": {
+            "country": "USA",
+            "county": "081",
+            "state": "CA",
+            "zipCode": "94404"
+            },
+            "idCode": "ABCD1234ABCD123",
+            "name": "Visa Inc. USA-Foster City",
+            "terminalId": "ABCD1234"
+            },
+            "cavv": "0700100038238906000013405823891061668252",
+            "foreignExchangeFeeTransaction": "11.99",
+            "localTransactionDateTime": "2018-10-21T09:12:53",
+            "retrievalReferenceNumber": "330000550000",
+            "senderCardExpiryDate": "2015-10",
+            "senderCurrencyCode": "USD",
+            "senderPrimaryAccountNumber": "4895142232120006",
+            "surcharge": "11.99",
+            "systemsTraceAuditNumber": "451001",
+            "nationalReimbursementFee": "11.22",
+            "cpsAuthorizationCharacteristicsIndicator": "Y",
+            "addressVerificationData": {
+            "street": "XYZ St",
+            "postalCode": "12345"
+          }
+        }
+        // Accept: application/json,application/octet-stream
+        // Authorization: {base64 encoded userid:password}
+        // https://sandbox.api.visa.com/visadirect/fundstransfer/v1/pullfundstransactions
+
+        const username = "9QFEG2CLWNY5T90Z169C21orzAexMmQkseGk6HPileeSNP-Qo";
+        const password = "QsKD00w576BqMMqdds3FyQF5700H0D98hFu";
+        const hash = new Buffer(`${username}:${password}`).toString('base64');
+
+        fetch('https://sandbox.api.visa.com/visadirect/fundstransfer/v1/pullfundstransactions', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Basic ${hash}`
+          },
+          json: true,
+          body: JSON.stringify(data),
+        })
+        .then((res)=>{
+            console.log("HN DEBUG res", res);
+        });
+    }
   }
 
   createListItem = (image_url, product_name, price, store_name) => {
